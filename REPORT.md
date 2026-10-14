@@ -16,7 +16,7 @@ Họ tên: Nguyễn Văn Chiến (2A202602926)
 | E3 | E2 + LoRA ViT | chưa chạy | — | — | — | — | — | — | — | — |
 | E4 | Chưa chạy | — | — | — | — | — | — | — | — | — |
 
-E0 có `parse_valid_rate` 0.653; E1 là 0.971. E1 loss cuối trung bình 100 lần cập nhật là 0.6051. Checkpoint E1 đã được đồng bộ lên Google Drive. E1 F1 chỉ cao hơn E0 0.020 trong khi thay đổi cả độ phân giải, vì vậy chưa thể kết luận LoRA cải thiện chất lượng.
+Kaggle đã xác minh và cấp 2 GPU Tesla T4. Chạy lại E0 trên Kaggle (640×360, 311 ảnh) cho `valid=0.650`, P=0.082, R=0.038, F1=0.052, CI95 0.029–0.079, meanIoU=0.619, FP/ảnh=0.79; per-class F1: pothole 0.124, crack 0.008, manhole 0.097. Kết quả khớp với lần E0 trước trong sai số làm tròn. E1 Kaggle được thử ở 640×360 nhưng OOM ở batch 2 ngay forward đầu tiên; chưa có checkpoint E1 từ lần chạy này. E0 có `parse_valid_rate` 0.653; E1 Colab là 0.971. E1 loss cuối trung bình 100 lần cập nhật là 0.6051. Checkpoint E1 đã được đồng bộ lên Google Drive. E1 F1 chỉ cao hơn E0 0.020 trong khi thay đổi cả độ phân giải, vì vậy chưa thể kết luận LoRA cải thiện chất lượng.
 
 ## 10 câu hỏi
 
@@ -60,8 +60,8 @@ Với 311 ảnh, CI95 của E0 là 0.029–0.078 (độ rộng 0.049), E1 là 0.
 
 ### Câu 10 — E4
 
-Biến E4 được chọn là rank LoRA: so sánh r=4 với r=64 trên setup tốt nhất theo F1 validation, giữ dữ liệu, độ phân giải 320×180, số bước 300 và các siêu tham số khác cố định. Sau khi chọn setup/rank bằng validation mới chấm test một lần. Thí nghiệm chưa chạy do Colab chặn cấp GPU vì usage limit và Kaggle chưa cấp GPU cho tài khoản; do đó chưa có F1/CI95 để báo cáo và chưa thể kết luận rank nào tốt hơn. Hàng E4 trong bảng vẫn để trống có chủ đích, không thay bằng số ước đoán.
+Biến E4 được chọn là rank LoRA: so sánh r=4 với r=64 trên setup tốt nhất theo F1 validation, giữ dữ liệu, độ phân giải 320×180, số bước 300 và các siêu tham số khác cố định. Sau khi chọn setup/rank bằng validation mới chấm test một lần. Thí nghiệm chưa chạy: Kaggle đã cấp GPU (2×T4), nhưng E1 ở 640×360 OOM trước khi có checkpoint; vì vậy chưa thể chọn setup tốt nhất bằng validation để chạy rank ablation và chưa có F1/CI95. Hàng E4 trong bảng vẫn để trống có chủ đích, không thay bằng số ước đoán.
 
 ## Nhìn lại
 
-Đã tải và chia dữ liệu theo session đúng phiên bản `d10-21e4070301`, kiểm tra không rò session, hoàn tất zero-shot E0 và huấn luyện E1 đủ 300 optimizer steps; adapter E1 được lưu trên Drive. Khó khăn chính là notebook có nhiều cell sửa thử nên trạng thái định nghĩa hàm không nhất quán (một lần scoring gặp `NameError: write_jsonl`), cùng lỗi lượng tử hoá projector khiến E2 chưa chạy. Khi thử tiếp tục trên Colab, Google báo không thể cấp GPU do usage limit; Kaggle trước đó cũng chưa bật được GPU vì tài khoản chưa xác minh. Cần nối lại GPU, dọn các cell tạm, sửa pipeline E2, chạy lại E1 ở 640×360, hoàn tất E2–E4 và đồng bộ evidence trước khi nộp.
+Đã tải và chia dữ liệu theo session đúng phiên bản `d10-21e4070301`, kiểm tra không rò session, hoàn tất zero-shot E0 và huấn luyện E1 đủ 300 optimizer steps; adapter E1 được lưu trên Drive. Khó khăn chính là notebook có nhiều cell sửa thử nên trạng thái định nghĩa hàm không nhất quán (một lần scoring gặp `NameError: write_jsonl`), cùng lỗi lượng tử hoá projector khiến E2 chưa chạy. Khi thử tiếp tục trên Colab, Google báo không thể cấp GPU do usage limit; Tài khoản Kaggle hiện đã xác minh và có 2×T4; E0 đã chạy lại thành công với kết quả sát lần trước. E1 ở 640×360 hết VRAM tại batch 2; cần khởi động kernel sạch và giảm micro-batch về 1/gradient accumulation lên 8 theo GUIDE, rồi tiếp tục E1–E4. E2/E3 còn cần giải quyết cách giữ projector/ViT ở floating point trước khi chạy.
