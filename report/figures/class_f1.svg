@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="390" viewBox="0 0 900 390" role="img" aria-labelledby="title desc">
+  <title id="title">F1 theo lớp của E0 và E1</title>
+  <desc id="desc">Biểu đồ cột các điểm F1 theo lớp. E0 dùng ảnh 640x360, E1 dùng ảnh 320x180 nên không so sánh trực tiếp.</desc>
+  <rect width="900" height="390" fill="#fff"/>
+  <text x="450" y="34" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#172033">F1 theo lớp — test</text>
+  <text x="450" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#7b3340">E0: 640×360 · E1: 320×180 — khác độ phân giải, không so sánh trực tiếp</text>
+  <line x1="230" y1="78" x2="230" y2="312" stroke="#596579" stroke-width="1.5"/>
+  <line x1="230" y1="312" x2="820" y2="312" stroke="#596579" stroke-width="1.5"/>
+  <g font-family="Arial,sans-serif" font-size="12" fill="#4b5563" text-anchor="middle">
+    <line x1="230" y1="312" x2="230" y2="318" stroke="#596579"/><text x="230" y="337">0.00</text>
+    <line x1="427" y1="312" x2="427" y2="318" stroke="#596579"/><text x="427" y="337">0.05</text>
+    <line x1="623" y1="312" x2="623" y2="318" stroke="#596579"/><text x="623" y="337">0.10</text>
+    <line x1="820" y1="312" x2="820" y2="318" stroke="#596579"/><text x="820" y="337">0.15</text>
+  </g>
+  <g font-family="Arial,sans-serif" font-size="15" fill="#172033" text-anchor="end">
+    <text x="210" y="125">pothole</text><text x="210" y="203">crack</text><text x="210" y="281">manhole</text>
+  </g>
+  <g>
+    <rect x="230" y="95" width="488" height="24" rx="3" fill="#315f9b"/><text x="727" y="112" font-family="Arial,sans-serif" font-size="13" fill="#172033">E0 0.124</text>
+    <rect x="230" y="123" width="98" height="20" rx="3" fill="#d18b26"/><text x="337" y="138" font-family="Arial,sans-serif" font-size="13" fill="#172033">E1 0.025</text>
+    <rect x="230" y="173" width="31" height="24" rx="3" fill="#315f9b"/><text x="270" y="190" font-family="Arial,sans-serif" font-size="13" fill="#172033">E0 0.008</text>
+    <rect x="230" y="201" width="248" height="20" rx="3" fill="#d18b26"/><text x="487" y="216" font-family="Arial,sans-serif" font-size="13" fill="#172033">E1 0.063</text>
+    <rect x="230" y="251" width="382" height="24" rx="3" fill="#315f9b"/><text x="621" y="268" font-family="Arial,sans-serif" font-size="13" fill="#172033">E0 0.097</text>
+    <rect x="230" y="279" width="519" height="20" rx="3" fill="#d18b26"/><text x="758" y="294" font-family="Arial,sans-serif" font-size="13" fill="#172033">E1 0.132</text>
+  </g>
+  <rect x="330" y="356" width="14" height="14" rx="2" fill="#315f9b"/><text x="351" y="368" font-family="Arial,sans-serif" font-size="13" fill="#172033">E0 zero-shot</text>
+  <rect x="470" y="356" width="14" height="14" rx="2" fill="#d18b26"/><text x="491" y="368" font-family="Arial,sans-serif" font-size="13" fill="#172033">E1 LoRA LLM</text>
+  <text x="450" y="386" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#6b7280">Nguồn: kết quả score.py đã lưu trong notebook Colab; E1 giảm độ phân giải để vừa T4.</text>
+</svg>
