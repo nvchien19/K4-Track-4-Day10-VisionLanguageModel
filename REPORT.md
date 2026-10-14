@@ -4,7 +4,7 @@ Họ tên: Nguyễn Văn Chiến (2A202602926)
 
 `dataset_version`: `d10-21e4070301`
 
-> Cập nhật theo kết quả đã thực sự chạy trên Colab T4. E0 dùng kích thước ảnh mặc định 640×360; E1 và lần E2 đang chạy dùng 320×180 để tiết kiệm VRAM/thời gian nên **E0 và E1 chưa phải phép so sánh công bằng**. E2/E3/E4 chưa có kết quả đánh giá hợp lệ; không suy diễn số liệu còn thiếu.
+> Cập nhật theo kết quả đã thực sự chạy trên Colab T4. E0 dùng kích thước ảnh mặc định 640×360; E1 và E2 dùng 320×180 để tiết kiệm VRAM/thời gian nên **E0 và E1 chưa phải phép so sánh công bằng**. E2 đã train đủ 300 bước nhưng chưa có điểm do runtime ngắt kết nối; E3/E4 chưa chạy. Không suy diễn số liệu còn thiếu.
 
 ## Bảng tổng hợp
 
@@ -12,7 +12,7 @@ Họ tên: Nguyễn Văn Chiến (2A202602926)
 |---|---|---:|---:|---:|---:|---|---:|---:|---:|---:|
 | E0 | Zero-shot, ảnh 640×360 | 0 | chưa đo | chưa đo | 0.051 | 0.029–0.078 | 0.80 | 0.124 | 0.008 | 0.097 |
 | E1 | LoRA LLM r=16, ảnh 320×180 | 33,030,144 | 9.076 | 26.49 | 0.071 | 0.052–0.094 | 1.77 | 0.025 | 0.063 | 0.132 |
-| E2 | E1 + projector, đang huấn luyện ở 320×180 | 142,135,296 | đang đo | đang chạy (≥30/300 bước) | — | — | — | — | — | — |
+| E2 | E1 + projector, ảnh 320×180; đã train 300/300 bước, chưa chấm xong | 142,135,296 | 6.355 | 40.26 | — | — | — | — | — | — |
 | E3 | E2 + LoRA ViT | chưa chạy | — | — | — | — | — | — | — | — |
 | E4 | Chưa chạy | — | — | — | — | — | — | — | — | — |
 
@@ -38,7 +38,7 @@ Mask phần prompt bằng `-100` để loss chỉ tối ưu câu trả lời JSO
 
 ### Câu 5 — Projector lượng tử hoá
 
-Projector lượng tử hoá 4-bit không thể được cập nhật đầy đủ như tensor tham số floating point thông thường. Bài yêu cầu giữ ViT/projector ở floating point; riêng projector được nâng lên float32 để cập nhật ổn định. Lần thử cũ có `Linear4bit` trong projector, làm bias bị ép về fp16 và tham số không hữu hạn sau optimizer. Lần chạy mới dùng `llm_int8_skip_modules=['model.visual','lm_head']` trong cấu hình NF4: kiểm tra thực tế thấy **0 `Linear4bit` trong visual**, projector là `Linear`. E2 qua thử forward/backward với loss 1.1067, gradient hữu hạn và VRAM đỉnh 8.133 GB ở bước thử; đang huấn luyện đầy đủ, chưa có điểm test.
+Projector lượng tử hoá 4-bit không thể được cập nhật đầy đủ như tensor tham số floating point thông thường. Bài yêu cầu giữ ViT/projector ở floating point; riêng projector được nâng lên float32 để cập nhật ổn định. Lần thử cũ có `Linear4bit` trong projector, làm bias bị ép về fp16 và tham số không hữu hạn sau optimizer. Lần chạy mới dùng `llm_int8_skip_modules=['model.visual','lm_head']` trong cấu hình NF4: kiểm tra thực tế thấy **0 `Linear4bit` trong visual**, projector là `Linear`. E2 qua thử forward/backward với loss 1.1067, gradient hữu hạn và VRAM đỉnh 8.133 GB ở bước thử; sau đó train đủ 300 bước, nhưng chưa có điểm test.
 
 ### Câu 6 — Chia theo phiên quay
 
@@ -46,7 +46,7 @@ Chia ngẫu nhiên có thể đưa các frame gần như trùng nhau của cùng
 
 ### Câu 7 — E1/E2/E3
 
-Chưa thể so sánh đủ ba setup: E1 có số liệu ở 320×180; E2 đã qua thử một bước với projector dense và đang huấn luyện 300 optimizer steps ở cùng độ phân giải; E3 chưa chạy. E1 đạt F1 0.071, CI95 0.052–0.094, VRAM đỉnh 9.076 GB, 26.49 phút. Chênh lệch với E0 chưa công bằng do độ phân giải đầu vào khác nhau.
+Chưa thể so sánh đủ ba setup: E1 có số liệu ở 320×180; E2 đã train đủ 300 bước với projector dense ở cùng độ phân giải nhưng chưa chấm xong do mất runtime; E3 chưa chạy. E1 đạt F1 0.071, CI95 0.052–0.094, VRAM đỉnh 9.076 GB, 26.49 phút. Chênh lệch với E0 chưa công bằng do độ phân giải đầu vào khác nhau.
 
 ### Câu 8 — Giới hạn của test
 
@@ -64,4 +64,4 @@ Biến E4 được chọn là rank LoRA: so sánh r=4 với r=64 trên setup t�
 
 ## Nhìn lại
 
-Đã tải và chia dữ liệu theo session đúng phiên bản `d10-21e4070301`, kiểm tra không rò session, hoàn tất zero-shot E0 và huấn luyện E1 đủ 300 optimizer steps; adapter E1 được lưu trên Drive từ phiên trước. Khó khăn là notebook có nhiều cell sửa thử nên trạng thái hàm từng không nhất quán (`NameError: write_jsonl`), và lần E2 đầu dùng projector 4-bit. Trong phiên [Colab T4 hiện tại](https://colab.research.google.com/drive/1_ARbg2AKsMI9ihEgHBAmbz3CP0ym6JY9?authuser=1), đã tải lại dữ liệu/model, xác nhận visual dense và bắt đầu E2 ở 320×180, batch 1, gradient accumulation 8; lúc ghi nhận đã qua bước 30/300, loss gần đây 0.8098 và checkpoint bước 25 đã được ghi trong `work/e2_r16`. Drive của tài khoản Colab hiện tại chưa mount thành công, nên checkpoint mới chưa được đồng bộ lên Drive. Kaggle vẫn kẹt ở trạng thái khởi động Draft Session. E3/E4 và scoring E2 sẽ chỉ được báo cáo sau khi thực sự chạy xong.
+Đã tải và chia dữ liệu theo session đúng phiên bản `d10-21e4070301`, kiểm tra không rò session, hoàn tất zero-shot E0 và huấn luyện E1 đủ 300 optimizer steps; adapter E1 được lưu trên Drive từ phiên trước. Khó khăn là notebook có nhiều cell sửa thử nên trạng thái hàm từng không nhất quán (`NameError: write_jsonl`), và lần E2 đầu dùng projector 4-bit. Trong phiên [Colab T4 hiện tại](https://colab.research.google.com/drive/1_ARbg2AKsMI9ihEgHBAmbz3CP0ym6JY9?authuser=1), đã tải lại dữ liệu/model, xác nhận visual dense và **hoàn tất E2 300/300 optimizer steps** ở 320×180, batch 1, gradient accumulation 8. `work/e2_r16/run.json` ghi 142,135,296 tham số train, VRAM đỉnh 6.355 GB trong vòng train, thời gian 40.26 phút; checkpoint adapter và projector đã được ghi trong runtime. Lượt suy luận E2 đầu tiên lỗi dtype Half/Float ở `generate`; đã sửa bằng autocast và chạy lại, nhưng Colab mất kết nối runtime trước khi có điểm. Drive của tài khoản Colab hiện tại chưa mount thành công, nên checkpoint E2 **chưa được xác nhận là còn truy cập được** sau ngắt kết nối. Notebook trên Drive vẫn giữ log huấn luyện. Kaggle cũ báo lỗi phiên tương tác; notebook Kaggle mới đang thử khởi động T4. E3/E4 sẽ chỉ được báo cáo sau khi thực sự chạy xong.
