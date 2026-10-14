@@ -13,7 +13,7 @@ Họ tên: Nguyễn Văn Chiến (2A202602926)
 | E0 | Zero-shot, ảnh 640×360 | 0 | chưa đo | chưa đo | 0.051 | 0.029–0.078 | 0.80 | 0.124 | 0.008 | 0.097 |
 | E1 | LoRA LLM r=16, ảnh 320×180 | 33,030,144 | 9.076 | 26.49 | 0.071 | 0.052–0.094 | 1.77 | 0.025 | 0.063 | 0.132 |
 | E2 | E1 + projector, ảnh 320×180; train 300/300 | 142,135,296 | 11.267 | 24.61 | 0.070 | 0.049–0.090 | 1.60 | 0.065 | 0.049 | 0.146 |
-| E3 | E2 + LoRA ViT | khởi chạy thất bại trước bước 1 | 14.53/14.56 | — | — | — | — | — | — | — |
+| E3 | E2 + LoRA ViT | 148,426,752 (đếm lúc setup) | OOM: 14.53/14.56 | — | — | — | — | — | — | — |
 | E4 | Chưa chạy | — | — | — | — | — | — | — | — | — |
 
 E0 có `parse_valid_rate` 0.653; E1 là 0.971; E2 là 0.990. E1 loss cuối trung bình 100 lần cập nhật là 0.6051; E2 là 0.6290. E2 đạt F1 0.070, CI95 0.049–0.090, FP/ảnh 1.60. E1 và E2 dùng cùng kích thước ảnh; CI95 chồng lấp, nên chưa có cơ sở khẳng định mở projector cải thiện F1. Theo yêu cầu của người học, phiên làm việc tiếp tục hoàn toàn trên Colab, không dùng Kaggle.
@@ -60,7 +60,7 @@ Với 311 ảnh, CI95 của E0 là 0.029–0.078 (độ rộng 0.049), E1 là 0.
 
 ### Câu 10 — E4
 
-Chọn biến E4 là rank LoRA: dự kiến so sánh r=4 và r=64 trên setup tốt nhất theo F1 validation, giữ dữ liệu, độ phân giải 320×180, số bước và các siêu tham số khác cố định; một biến thể gốc có thể dùng r=16. Thí nghiệm chưa chạy và hiện chưa có F1/CI95. Cần chọn setup bằng validation, sau đó chạy hai rank và mới chấm test theo hướng dẫn. Hàng E4 để trống có chủ đích, không thay bằng số ước đoán.
+Chọn biến E4 là rank LoRA: dự kiến so sánh r=4 và r=64 trên E2, giữ dữ liệu, độ phân giải 320×180, số bước và các siêu tham số khác cố định; baseline là E2 r=16. E4 chưa được huấn luyện hoặc chấm, nên không có F1/CI95 và chưa tạo evidence. Có thể ước tính số tham số trainable theo tuyến tính với rank từ E2 r=16: projector giữ 109,105,152 tham số; LoRA r=16 có 33,030,144. Vì vậy E2 r=4 ước tính 117,362,688 tổng tham số trainable và E2 r=64 ước tính 241,225,728. Đây chỉ là phép tính quy mô adapter, không phải kết quả chạy hoặc file evidence hợp lệ. Cần chạy hai rank và chấm test theo hướng dẫn để hoàn tất E4.
 
 ## Nhìn lại
 
