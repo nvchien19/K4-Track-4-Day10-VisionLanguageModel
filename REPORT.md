@@ -4,7 +4,7 @@ Họ tên: Nguyễn Văn Chiến (2A202602926)
 
 `dataset_version`: `d10-21e4070301`
 
-> Cập nhật theo kết quả đã thực sự chạy trên Colab T4. E0 dùng kích thước ảnh mặc định 640×360; E1 và E2 dùng 320×180 để tiết kiệm VRAM/thời gian nên **E0 và E1 chưa phải phép so sánh công bằng**. E2 đã train đủ 300 bước nhưng chưa có điểm do runtime ngắt kết nối; E3/E4 chưa chạy. Không suy diễn số liệu còn thiếu.
+> Cập nhật theo kết quả đã thực sự chạy trên Colab T4. E0 dùng kích thước ảnh mặc định 640×360; E1 và E2 dùng 320×180 nên **E0 và E1 chưa phải phép so sánh công bằng**. E2 đã huấn luyện 300 bước và đang suy luận trên test; số liệu E2 sẽ được thêm sau khi cell chấm điểm hoàn tất. E3/E4 chưa chạy. Không suy diễn số liệu còn thiếu.
 
 ## Bảng tổng hợp
 
@@ -12,11 +12,11 @@ Họ tên: Nguyễn Văn Chiến (2A202602926)
 |---|---|---:|---:|---:|---:|---|---:|---:|---:|---:|
 | E0 | Zero-shot, ảnh 640×360 | 0 | chưa đo | chưa đo | 0.051 | 0.029–0.078 | 0.80 | 0.124 | 0.008 | 0.097 |
 | E1 | LoRA LLM r=16, ảnh 320×180 | 33,030,144 | 9.076 | 26.49 | 0.071 | 0.052–0.094 | 1.77 | 0.025 | 0.063 | 0.132 |
-| E2 | E1 + projector, ảnh 320×180; đã train 300/300 bước, chưa chấm xong | 142,135,296 | 6.355 | 40.26 | — | — | — | — | — | — |
+| E2 | E1 + projector, ảnh 320×180; train 300/300, đang chấm test | 142,135,296 | 11.267 | 24.61 | — | — | — | — | — | — |
 | E3 | E2 + LoRA ViT | chưa chạy | — | — | — | — | — | — | — | — |
 | E4 | Chưa chạy | — | — | — | — | — | — | — | — | — |
 
-Kaggle đã xác minh và cấp 2 GPU Tesla T4. Chạy lại E0 trên Kaggle (640×360, 311 ảnh) cho `valid=0.650`, P=0.082, R=0.038, F1=0.052, CI95 0.029–0.079, meanIoU=0.619, FP/ảnh=0.79; per-class F1: pothole 0.124, crack 0.008, manhole 0.097. Kết quả khớp với lần E0 trước trong sai số làm tròn. E1 Kaggle được thử ở 640×360 nhưng OOM ở batch 2 ngay forward đầu tiên; chưa có checkpoint E1 từ lần chạy này. E0 có `parse_valid_rate` 0.653; E1 Colab là 0.971. E1 loss cuối trung bình 100 lần cập nhật là 0.6051. Checkpoint E1 đã được đồng bộ lên Google Drive. E1 F1 chỉ cao hơn E0 0.020 trong khi thay đổi cả độ phân giải, vì vậy chưa thể kết luận LoRA cải thiện chất lượng.
+E0 có `parse_valid_rate` 0.653; E1 Colab là 0.971. E1 loss cuối trung bình 100 lần cập nhật là 0.6051. Checkpoint E1 đã được đồng bộ lên Google Drive. E1 F1 chỉ cao hơn E0 0.020 trong khi thay đổi cả độ phân giải, vì vậy chưa thể kết luận LoRA cải thiện chất lượng. Theo yêu cầu của người học, phiên làm việc tiếp tục hoàn toàn trên Colab, không dùng Kaggle.
 
 ## 10 câu hỏi
 
@@ -46,7 +46,7 @@ Chia ngẫu nhiên có thể đưa các frame gần như trùng nhau của cùng
 
 ### Câu 7 — E1/E2/E3
 
-Chưa thể so sánh đủ ba setup: E1 có số liệu ở 320×180; E2 đã train đủ 300 bước với projector dense ở cùng độ phân giải nhưng chưa chấm xong do mất runtime; E3 chưa chạy. E1 đạt F1 0.071, CI95 0.052–0.094, VRAM đỉnh 9.076 GB, 26.49 phút. Chênh lệch với E0 chưa công bằng do độ phân giải đầu vào khác nhau.
+Chưa thể so sánh đủ ba setup: E1 có số liệu ở 320×180; E2 đã train đủ 300 bước với projector dense ở cùng độ phân giải và đang chấm 311 ảnh test; E3 chưa chạy. E1 đạt F1 0.071, CI95 0.052–0.094, VRAM đỉnh 9.076 GB, 26.49 phút. Chênh lệch với E0 chưa công bằng do độ phân giải đầu vào khác nhau.
 
 ### Câu 8 — Giới hạn của test
 
@@ -60,8 +60,8 @@ Với 311 ảnh, CI95 của E0 là 0.029–0.078 (độ rộng 0.049), E1 là 0.
 
 ### Câu 10 — E4
 
-Biến E4 được chọn là rank LoRA: so sánh r=4 với r=64 trên setup tốt nhất theo F1 validation, giữ dữ liệu, độ phân giải 320×180, số bước 300 và các siêu tham số khác cố định. Sau khi chọn setup/rank bằng validation mới chấm test một lần. Thí nghiệm chưa chạy: Kaggle đã cấp GPU (2×T4), nhưng E1 ở 640×360 OOM trước khi có checkpoint; vì vậy chưa thể chọn setup tốt nhất bằng validation để chạy rank ablation và chưa có F1/CI95. Hàng E4 trong bảng vẫn để trống có chủ đích, không thay bằng số ước đoán.
+Biến E4 được chọn là rank LoRA: so sánh r=4 với r=64 trên setup tốt nhất theo F1 validation, giữ dữ liệu, độ phân giải 320×180, số bước 300 và các siêu tham số khác cố định. Sau khi chọn setup/rank bằng validation mới chấm test một lần. Thí nghiệm chưa chạy: Kaggle đã cấp GPU (2×T4), nhưng E1 ở 640×360 OOM trước khi có checkpoint; vì vậy chưa thể chọn setup tốt nhất bằng validation để chạy rank ablation và chưa có F1/CI95. Hàng E4 trong bảng để trống có chủ đích, không thay bằng số ước đoán.
 
 ## Nhìn lại
 
-Đã tải và chia dữ liệu theo session đúng phiên bản `d10-21e4070301`, kiểm tra không rò session, hoàn tất zero-shot E0 và huấn luyện E1 đủ 300 optimizer steps; adapter E1 được lưu trên Drive từ phiên trước. Khó khăn là notebook có nhiều cell sửa thử nên trạng thái hàm từng không nhất quán (`NameError: write_jsonl`), và lần E2 đầu dùng projector 4-bit. Trong phiên Colab T4 trước đó (notebook `1_ARbg2AKsMI9ihEgHBAmbz3CP0ym6JY9`), đã tải lại dữ liệu/model, xác nhận visual dense và **hoàn tất E2 300/300 optimizer steps** ở 320×180, batch 1, gradient accumulation 8. Log `work/e2_r16/run.json` ghi 142,135,296 tham số train, VRAM đỉnh 6.355 GB trong vòng train, thời gian 40.26 phút; checkpoint adapter và projector đã được ghi trong runtime. Lượt suy luận E2 đầu tiên lỗi dtype Half/Float ở `generate`; đã sửa bằng autocast và chạy lại, nhưng runtime ngắt kết nối trước khi có điểm. Tiếp tục ngày 14/10 trên notebook `1pRHWMcGAeULL5BsWg_kMJ6pqB-cF7vOb`: Colab hiện báo **không thể cấp GPU do usage limits**. Runtime CPU tạm kết nối được; kiểm tra xác nhận kernel mới rỗng, không có thư mục repo/checkpoint E2 trong runtime hay đường dẫn Drive dự kiến. Vì vậy chưa khôi phục được E2 và chưa có điểm test. Notebook `1_AR…` trước đó cũng từng trả lỗi OAuth trên phiên Chrome hiện tại. Kaggle notebook mới đã từng được xác nhận có 2 GPU T4 nhưng chưa xác minh trạng thái lần này. E3/E4 chưa chạy và sẽ chỉ được báo cáo sau khi có kết quả thực tế.
+Đã tải và chia dữ liệu theo session đúng phiên bản `d10-21e4070301`, kiểm tra không rò session, hoàn tất zero-shot E0 và huấn luyện E1 đủ 300 optimizer steps; adapter E1 được lưu trên Drive. Notebook có nhiều cell sửa thử nên trạng thái hàm từng không nhất quán (`NameError: write_jsonl`), và các lượt E2 trước dùng projector 4-bit hoặc gặp lỗi AMP khi optimizer đổi dtype bias. Lượt Colab T4 mới nhất đã khắc phục cấu hình bằng cách nạp lại model, giữ visual dense, chuyển projector trainable sang FP32, kiểm tra 0 `Linear4bit` trong visual, và hoàn tất **E2 300/300** ở 320×180, batch 1, gradient accumulation 8. Kết quả train đo được: 142,135,296 tham số train, peak VRAM 11.267 GB, 24.61 phút, loss trung bình 100 micro-batch cuối 0.6290. Checkpoint đã đồng bộ vào Google Drive `/MyDrive/road_damage_lab_2A202602926/e2_r16`. Suy luận test E2 đang chạy theo ảnh và ghi JSONL từng 10 dự đoán lên Drive; tại thời điểm cập nhật báo cáo runtime đang phục hồi sau ngắt kết nối. E3/E4 chưa chạy; câu 10 mô tả ablation rank r=4 và r=64 như kế hoạch, không có kết quả thực nghiệm.
